@@ -2,6 +2,8 @@ from rest_framework import viewsets, generics
 
 from lms_platform.models import Course, Lesson
 from lms_platform.serializers import CourseSerializer, LessonSerializer
+from users.models import User
+from users.serializiers import UserSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -38,6 +40,11 @@ class LessonDestroyApiView(generics.DestroyAPIView):
     """Класс-представление для удаления уроков на основе Generics"""
     queryset = Lesson.objects.all()
 
+
+class UserCreateApiView(generics.CreateAPIView):
+    """Класс-представление для создания пользователя"""
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
 
 
 

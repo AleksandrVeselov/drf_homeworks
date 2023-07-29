@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('lms_platform.urls', namespace='lms_platform'))
+    path('', include('lms_platform.urls', namespace='lms_platform')),
+    path('user/', include('commands.urls', namespace='user')),
 ]
