@@ -18,3 +18,4 @@ class Lesson(models.Model):
     description = models.TextField(verbose_name='Описание урока')
     preview = models.ImageField(verbose_name='Превью', **NULLABLE)
     link_to_video = models.CharField(max_length=255, verbose_name='Ссылка на видео')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, **NULLABLE)  # Ссылка на курс

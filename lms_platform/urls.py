@@ -9,7 +9,7 @@ from lms_platform.views import CourseViewSet, LessonCreateApiView, LessonListApi
 app_name = LmsPlatformConfig.name
 
 router = DefaultRouter()
-router.register('course', CourseViewSet, basename='course')
+router.register(r'course', CourseViewSet, basename='course')
 
 urlpatterns = [
     path('lesson/create/', LessonCreateApiView.as_view(), name='lesson_create'),
