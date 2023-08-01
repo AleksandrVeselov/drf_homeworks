@@ -1,9 +1,12 @@
-from django.urls import path
 
-from lms_platform.views import UserCreateApiView
+from rest_framework.routers import DefaultRouter
+
+
 from users.apps import UsersConfig
+from users.views import UserViewSet
 
 app_name = UsersConfig.name
-urlpatterns = [
-    path('create/', UserCreateApiView.as_view()),
-]
+
+router = DefaultRouter()
+router.register(r'user', UserViewSet, basename='user')
+urlpatterns = [] + router.urls
