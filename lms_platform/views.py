@@ -1,7 +1,8 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
 
-from lms_platform.models import Course, Lesson
-from lms_platform.serializers import CourseSerializer, LessonSerializer
+from lms_platform.models import Course, Lesson, Payment
+from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 from users.models import User
 from users.serializiers import UserSerializer
 
@@ -45,6 +46,14 @@ class UserCreateApiView(generics.CreateAPIView):
     """Класс-представление для создания пользователя"""
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+
+class PaymentListAPIView(generics.ListAPIView):
+    """Класс-представление для вывода списка платежей"""
+    serializer_class = PaymentSerializer
+    queryset = Payment.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ('course', 'lesson', 'payment_method')
 
 
 
