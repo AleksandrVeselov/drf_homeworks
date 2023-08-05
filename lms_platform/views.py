@@ -14,10 +14,22 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer  # Класс-сериализатор
     queryset = Course.objects.all()
 
+    def perform_create(self, serializer):
+        """Переопределение метода perform_create для добавления пользователя"""
+        new_course = serializer.save()
+        new_course.owner = self.request.user
+        new_course.save()
+
 
 class LessonCreateApiView(generics.CreateAPIView):
     """Класс-представление для создания урока на основе Generics"""
     serializer_class = LessonSerializer
+
+    def perform_create(self, serializer):
+        """Переопределение метода perform_create для добавления пользователя созданному уроку"""
+        new_lesson = serializer.save()
+        new_lesson.owner = self.request.user
+        new_lesson.save()
 
 
 class LessonListApiView(generics.ListAPIView):
