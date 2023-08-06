@@ -5,9 +5,8 @@ class IsOwnerOrModerator(BasePermission):
     """Проверка прав доступа"""
 
     def has_permission(self, request, view):
-        print(request.user.groups.filter(name='oderator').exists())
         # если пользователь относится к группе модераторы то возвращаем True
-        if request.user.groups.filter(name='oderator').exists():
+        if request.user.groups.filter(name='Moderator').exists():
             return True
 
         return request.user == view.get_object().owner  # если пользователь это владелец, то возвращаем True
