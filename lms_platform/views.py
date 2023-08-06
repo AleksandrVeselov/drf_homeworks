@@ -1,8 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
-from rest_framework.filters import OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.permissions import IsAuthenticated
 
 from lms_platform.models import Course, Lesson, Payment
+from lms_platform.permissions import IsOwnerOrModerator, IsOwner, IsNotModerator
 from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 from users.models import User
 from users.serializiers import UserSerializer
@@ -14,6 +16,8 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer  # Класс-сериализатор
     queryset = Course.objects.all()
 
+    permission_classes = [IsAuthenticated]
+
     def perform_create(self, serializer):
         """Переопределение метода perform_create для добавления пользователя"""
         new_course = serializer.save()
@@ -24,6 +28,9 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonCreateApiView(generics.CreateAPIView):
     """Класс-представление для создания урока на основе Generics"""
     serializer_class = LessonSerializer
+
+    # права доступа на добавление урока только для авторизованных пользователей, не входящих в группу модераторы
+    permission_classes = [IsAuthenticated, IsNotModerator]
 
     def perform_create(self, serializer):
         """Переопределение метода perform_create для добавления пользователя созданному уроку"""
@@ -37,11 +44,15 @@ class LessonListApiView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
 
+    permission_classes = [IsAuthenticated]
+
 
 class LessonRetrieveApiView(generics.RetrieveAPIView):
     """Класс-представление для просмотра урока на основе Generics"""
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+
+    permission_classes = [IsAuthenticated]
 
 
 class LessonUpdateApiView(generics.UpdateAPIView):
@@ -49,16 +60,15 @@ class LessonUpdateApiView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
 
+    # права доступа на редактирование урока только для его создателя или для пользователей, входящих в группу модераторы
+    permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+
 
 class LessonDestroyApiView(generics.DestroyAPIView):
     """Класс-представление для удаления уроков на основе Generics"""
     queryset = Lesson.objects.all()
 
-
-class UserCreateApiView(generics.CreateAPIView):
-    """Класс-представление для создания пользователя"""
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsOwner]  # права доступа на удаление урока только для его создателя
 
 
 class PaymentListAPIView(generics.ListAPIView):
@@ -66,9 +76,13 @@ class PaymentListAPIView(generics.ListAPIView):
 
     serializer_class = PaymentSerializer  # класс-сериализатор
     queryset = Payment.objects.all()  # список платежей
-    filter_backends = [DjangoFilterBackend, OrderingFilter]  # фильтры
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]  # фильтры
+
+    permission_classes = [IsAuthenticated]
+
     filterset_fields = ('course', 'lesson', 'payment_method')  # поля по которым можно фильтровать
     ordering_fields = ('payment_date',)  # Поля, по которым можно сортировать
+    search_fields = ('course', 'lesson', 'payment_method')  # Поля, по которым можно производить поиск
 
 
 
