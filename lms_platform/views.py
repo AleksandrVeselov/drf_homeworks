@@ -4,6 +4,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
 from lms_platform.models import Course, Lesson, Payment
+from lms_platform.paginators import CoursePaginator, LessonPaginator
 from lms_platform.permissions import IsOwnerOrModerator, IsOwner, IsNotModerator
 from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
 from users.models import User
@@ -15,6 +16,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     serializer_class = CourseSerializer  # Класс-сериализатор
     queryset = Course.objects.all()
+    pagination_class = CoursePaginator
 
     def perform_create(self, serializer):
         """Переопределение метода perform_create для добавления пользователя"""
@@ -64,6 +66,7 @@ class LessonListApiView(generics.ListAPIView):
     queryset = Lesson.objects.all()
 
     permission_classes = [IsAuthenticated]
+    pagination_class = LessonPaginator
 
 
 class LessonRetrieveApiView(generics.RetrieveAPIView):
