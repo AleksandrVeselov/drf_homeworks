@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
@@ -19,6 +20,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     count_lessons = SerializerMethodField()  # Количество уроков
     lessons = SerializerMethodField()  # список уроков
+    is_subscribed = SerializerMethodField()  # Проверка подписки
 
     def get_count_lessons(self, course):
         """Метод для получения количества уроков в курсе"""
@@ -29,6 +31,11 @@ class CourseSerializer(serializers.ModelSerializer):
         """Метод для получения списка всех уроков в курсе"""
 
         return [lesson.title for lesson in course.lesson_set.all()]
+
+    def get_is_subscribed(self, course):
+        """Метод для проверки подписки к курсу"""
+
+        return Subscription.objects.filter(course=course, user=self.context['request'].user).exists()
 
     class Meta:
         model = Course  # Модель
