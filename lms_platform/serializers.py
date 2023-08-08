@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
-from lms_platform.models import Course, Lesson, Payment
+from lms_platform.models import Course, Lesson, Payment, Subscription
 from lms_platform.validators import LinkToVideoValidator
 
 
@@ -40,4 +40,12 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
+        fields = '__all__'
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели подписки"""
+
+    class Meta:
+        model = Subscription
         fields = '__all__'

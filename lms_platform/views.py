@@ -3,10 +3,10 @@ from rest_framework import viewsets, generics
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
 
-from lms_platform.models import Course, Lesson, Payment
+from lms_platform.models import Course, Lesson, Payment, Subscription
 from lms_platform.paginators import CoursePaginator, LessonPaginator
 from lms_platform.permissions import IsOwnerOrModerator, IsOwner, IsNotModerator
-from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer
+from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
 from users.models import User
 from users.serializiers import UserSerializer
 
@@ -105,6 +105,37 @@ class PaymentListAPIView(generics.ListAPIView):
     filterset_fields = ('course', 'lesson', 'payment_method')  # поля по которым можно фильтровать
     ordering_fields = ('payment_date',)  # Поля, по которым можно сортировать
     search_fields = ('course', 'lesson', 'payment_method')  # Поля, по которым можно производить поиск
+
+
+class SubscriptionCreateAPIView(generics.CreateAPIView):
+    """Класс-представление для подписки курс на основе Generics"""
+
+    serializer_class = SubscriptionSerializer  # класс-сериализатор
+    permission_classes = [IsAuthenticated]  # права доступа на подписку
+
+    def perform_create(self, serializer, **kwargs):
+        """Переопределение метода perform_create для добавления пользователя"""
+
+        new_subscription = serializer.save()  # создаем новую подписку
+        new_subscription.user = self.request.user  # добавляем пользователя
+        new_subscription.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем курс
+        new_subscription.save()  # сохраняем новую подписку
+
+
+class SubscriptionDestroyAPIView(generics.DestroyAPIView):
+    """Удаление подписки на курс на основе Generics"""
+
+    queryset = Course.objects.all()  # список уроков
+
+    permission_classes = [IsAuthenticated]  # права доступа на удаление подписки только для ее создателя
+
+    def perform_destroy(self, instance, **kwargs):
+        """Переопределение метода perform_destroy для удаления подписки на курс"""
+
+        # получаем подписку
+        subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=self.request.user)
+
+        subscription.delete()  # удаляем подписку
 
 
 
