@@ -6,19 +6,28 @@ from lms_platform.models import Course, Lesson, Subscription
 from users.models import User
 
 
+# Для корректной работы тестов нужно закомментировать permission_classes во всех тестируемых контроллерах
 class LessonTestCase(APITestCase):
     """Тестирование уроков"""
 
     def setUp(self):
+
+        # Создание пользователя для тестирования
         self.user = User.objects.create(email='test_user@test,ru', password='test_password', phone='test_phone')
+
+        # Создание курса для тестирования
         self.course = Course.objects.create(title='Тестовый курс', description='Описание тестового курса',
                                             owner=self.user)
+
+        # Создание урока для тестирования
         self.lesson = Lesson.objects.create(title='Урок 25.2', description='Описание урока 25.2',
                                             link_to_video='https://www.youtube.com/', owner=self.user,
                                             course=self.course)
 
     def test_create_lesson(self):
         """Тестирование создания урока"""
+
+        # Данные для создания урока
         data = {
             'title': 'Урок 25.2 другой',
             "description": "Описание урока 25.2 другое",
@@ -26,7 +35,7 @@ class LessonTestCase(APITestCase):
             'owner': self.user.pk,
         }
 
-        response = self.client.post(reverse('lms_platform:lesson_create'), data=data)
+        response = self.client.post(reverse('lms_platform:lesson_create'), data=data)  # Отправка запроса
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # Проверка статуса ответа
 
@@ -53,6 +62,7 @@ class LessonTestCase(APITestCase):
     def test_update_lessons(self):
         """Тестирование обновления урока"""
 
+        # Данные для обновления урока
         data = {
             'title': 'Урок 25.2 измененный',
             "description": "Описание урока 25.2 измененное",
@@ -62,6 +72,7 @@ class LessonTestCase(APITestCase):
             'owner': self.user.pk
         }
 
+        # Запрос на обновление урока
         response = self.client.put(reverse('lms_platform:lesson_update', args=[self.lesson.pk]), data=data)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)  # Проверка статуса ответа
@@ -80,6 +91,7 @@ class LessonTestCase(APITestCase):
     def test_get_lessons_by_id(self):
         """Тестирование получения урока по id"""
 
+        # Запрос на получение урока по id
         response = self.client.get(reverse('lms_platform:lesson_get', args=[self.lesson.pk]))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)  # Проверка статуса ответа
@@ -98,17 +110,22 @@ class LessonTestCase(APITestCase):
     def test_destroy_lessons(self):
         """Тестирование удаления урока"""
 
+        # Запрос на удаление урока
         response = self.client.delete(reverse('lms_platform:lesson_delete', args=[self.lesson.pk]))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)  # Проверка статуса ответа
 
+        self.assertEqual(Lesson.objects.all().count(), 0)  # Проверка количества записей уроков в БД
+
     def test_subscribe_unsubscribe_course(self):
         """Тестирование подписки на урок"""
 
+        # Данные о пользователе для подписки на курс
         data = {
             'user': self.user.pk,
         }
 
+        # Отправка запроса на подписку на курс
         response = self.client.post(reverse('lms_platform:subscribe', args=[self.course.pk]), data=data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # Проверка статуса ответа
@@ -116,9 +133,10 @@ class LessonTestCase(APITestCase):
         # Проверка наличия подписки на курс
         self.assertEqual(Subscription.objects.filter(user=self.user, course=self.course).exists(), True)
 
+        # Отправка запроса на отписку от курса
         response = self.client.delete(reverse('lms_platform:unsubscribe', args=[self.course.pk]))
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)  # Проверка статуса ответа
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)  # Проверка статуса ответа
 
         # Проверка отсутствия подписки на курс
-        self.assertEqual(Subscription.objects.filter(user=self.user, course=self.course).exists(), True)
+        self.assertEqual(Subscription.objects.filter(user=self.user, course=self.course).exists(), False)

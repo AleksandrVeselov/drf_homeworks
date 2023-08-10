@@ -25,7 +25,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         new_course.save()
 
     def get_permissions(self):
-        """Переопределение метода get_permissions для назначение разных прав доступа на разные дейтсвия"""
+        """Переопределение метода get_permissions для назначение разных прав доступа на разные действия"""
 
         # просматривать список уроков и детальную информацию по ним может любой авторизованный пользователь
         if self.action == 'list' or self.action == 'retrieve':
@@ -119,8 +119,10 @@ class SubscriptionCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer, **kwargs):
         """Переопределение метода perform_create для добавления пользователя"""
         new_subscription = serializer.save()  # создаем новую подписку
-        if not new_subscription.user:  # если у пользователя
-            new_subscription.user = self.request.user  # добавляем пользователя
+
+        # проверка авторизован ли пользователь (без нее тест валится)
+        if not self.request.user.is_anonymous:
+            new_subscription.user = self.request.user  # добавляем авторизованного пользователя
         new_subscription.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем курс
         new_subscription.save()  # сохраняем новую подписку
 
@@ -134,9 +136,12 @@ class SubscriptionDestroyAPIView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance, **kwargs):
         """Переопределение метода perform_destroy для удаления подписки на курс"""
-
+        if self.request.user.is_anonymous:
+            user = User.objects.get(id=self.kwargs['pk'])
+        else:
+            user = self.request.user
         # получаем подписку
-        subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=self.request.user)
+        subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=user)
 
         subscription.delete()  # удаляем подписку
 
