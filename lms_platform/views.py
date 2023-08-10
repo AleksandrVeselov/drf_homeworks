@@ -51,7 +51,7 @@ class LessonCreateApiView(generics.CreateAPIView):
     serializer_class = LessonSerializer
 
     # права доступа на добавление урока только для авторизованных пользователей, не входящих в группу модераторы
-    # permission_classes = [IsAuthenticated, IsNotModerator]
+    permission_classes = [IsAuthenticated, IsNotModerator]
 
     def perform_create(self, serializer):
         """Переопределение метода perform_create для добавления пользователя созданному уроку"""
@@ -68,7 +68,7 @@ class LessonListApiView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     pagination_class = LessonPaginator
 
 
@@ -77,7 +77,7 @@ class LessonRetrieveApiView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
 
 class LessonUpdateApiView(generics.UpdateAPIView):
@@ -86,14 +86,14 @@ class LessonUpdateApiView(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
 
     # права доступа на редактирование урока только для его создателя или для пользователей, входящих в группу модераторы
-    # permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+    permission_classes = [IsAuthenticated, IsOwnerOrModerator]
 
 
 class LessonDestroyApiView(generics.DestroyAPIView):
     """Класс-представление для удаления уроков на основе Generics"""
     queryset = Lesson.objects.all()
 
-    # permission_classes = [IsAuthenticated, IsOwner]  # права доступа на удаление урока только для его создателя
+    permission_classes = [IsAuthenticated, IsOwner]  # права доступа на удаление урока только для его создателя
 
 
 class PaymentListAPIView(generics.ListAPIView):
@@ -114,7 +114,7 @@ class SubscriptionCreateAPIView(generics.CreateAPIView):
     """Класс-представление для подписки курс на основе Generics"""
 
     serializer_class = SubscriptionSerializer  # класс-сериализатор
-    # permission_classes = [IsAuthenticated]  # права доступа на подписку
+    permission_classes = [IsAuthenticated]  # права доступа на подписку
 
     def perform_create(self, serializer, **kwargs):
         """Переопределение метода perform_create для добавления пользователя"""
@@ -132,7 +132,7 @@ class SubscriptionDestroyAPIView(generics.DestroyAPIView):
 
     queryset = Course.objects.all()  # список уроков
 
-    # permission_classes = [IsAuthenticated]  # права доступа на удаление подписки только для ее создателя
+    permission_classes = [IsAuthenticated]  # права доступа на удаление подписки только для ее создателя
 
     def perform_destroy(self, instance, **kwargs):
         """Переопределение метода perform_destroy для удаления подписки на курс"""
