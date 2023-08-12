@@ -11,10 +11,12 @@ class LessonTestCase(APITestCase):
     """Тестирование уроков"""
 
     def setUp(self):
+        """Подготовка данных перед каждым тестом"""
 
         # Создание пользователя для тестирования
         self.user = User.objects.create(email='test_user@test.ru',
-                                        phone='test_phone', is_staff=False,
+                                        phone='test_phone',
+                                        is_staff=False,
                                         is_superuser=False,
                                         is_active=True)
 
