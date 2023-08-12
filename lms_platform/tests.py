@@ -13,16 +13,32 @@ class LessonTestCase(APITestCase):
     def setUp(self):
 
         # Создание пользователя для тестирования
-        self.user = User.objects.create(email='test_user@test,ru', password='test_password', phone='test_phone')
+        self.user = User.objects.create(email='test_user@test.ru',
+                                        phone='test_phone', is_staff=False,
+                                        is_superuser=False,
+                                        is_active=True)
+
+        self.user.set_password('qwerty')  # Устанавливаем пароль
+        self.user.save()  # Сохраняем изменения пользователя в базе данных
 
         # Создание курса для тестирования
-        self.course = Course.objects.create(title='Тестовый курс', description='Описание тестового курса',
+        self.course = Course.objects.create(title='Тестовый курс',
+                                            description='Описание тестового курса',
                                             owner=self.user)
 
         # Создание урока для тестирования
-        self.lesson = Lesson.objects.create(title='Урок 25.2', description='Описание урока 25.2',
-                                            link_to_video='https://www.youtube.com/', owner=self.user,
+        self.lesson = Lesson.objects.create(title='Урок 25.2',
+                                            description='Описание урока 25.2',
+                                            link_to_video='https://www.youtube.com/',
+                                            owner=self.user,
                                             course=self.course)
+
+        # Запрос токена для авторизации
+        response = self.client.post('/users/token/', data={'email': self.user.email, 'password': 'qwerty'})
+
+        self.access_token = response.data.get('access')  # Токен для авторизации
+
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + self.access_token)  # Авторизация пользователя
 
     def test_create_lesson(self):
         """Тестирование создания урока"""

@@ -57,10 +57,8 @@ class LessonCreateApiView(generics.CreateAPIView):
         """Переопределение метода perform_create для добавления пользователя созданному уроку"""
         new_lesson = serializer.save()
 
-        # если у урока нет пользователя, то добавляем в базу данные о авторизованном пользователе
-        if not new_lesson.owner:
-            new_lesson.owner = self.request.user
-            new_lesson.save()
+        new_lesson.owner = self.request.user
+        new_lesson.save()
 
 
 class LessonListApiView(generics.ListAPIView):
@@ -120,9 +118,7 @@ class SubscriptionCreateAPIView(generics.CreateAPIView):
         """Переопределение метода perform_create для добавления пользователя"""
         new_subscription = serializer.save()  # создаем новую подписку
 
-        # проверка авторизован ли пользователь (без нее тест валится)
-        if not self.request.user.is_anonymous:
-            new_subscription.user = self.request.user  # добавляем авторизованного пользователя
+        new_subscription.user = self.request.user  # добавляем авторизованного пользователя
         new_subscription.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем курс
         new_subscription.save()  # сохраняем новую подписку
 
@@ -136,10 +132,8 @@ class SubscriptionDestroyAPIView(generics.DestroyAPIView):
 
     def perform_destroy(self, instance, **kwargs):
         """Переопределение метода perform_destroy для удаления подписки на курс"""
-        if self.request.user.is_anonymous:
-            user = User.objects.get(id=self.kwargs['pk'])
-        else:
-            user = self.request.user
+
+        user = self.request.user
         # получаем подписку
         subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=user)
 
