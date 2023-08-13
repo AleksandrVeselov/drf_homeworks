@@ -50,6 +50,10 @@ class PaymentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
+
+
+
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор для модели подписки"""
 
