@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 
+from lms_platform.management.utils import get_stripe_link
 from lms_platform.models import Course, Lesson, Payment, Subscription
 from lms_platform.validators import LinkToVideoValidator
 
@@ -44,6 +45,16 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class PaymentSerializer(serializers.ModelSerializer):
     """Сериализатор модели Платеж"""
+
+    payment_link = SerializerMethodField()  # Ссылка на оплату
+
+    def get_payment_link(self, payment):
+        """Метод для получения ссылки на оплату"""
+        if payment.course:
+            payment_link = get_stripe_link(payment.course)
+        else:
+            payment_link = get_stripe_link(payment.lesson)
+        return payment_link
 
     class Meta:
         model = Payment

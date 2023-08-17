@@ -108,6 +108,36 @@ class PaymentListAPIView(generics.ListAPIView):
     search_fields = ('course', 'lesson', 'payment_method')  # Поля, по которым можно производить поиск
 
 
+class PaymentLessonCreateAPIView(generics.CreateAPIView):
+    """Класс-представление для создания платежа для урока на основе Generics"""
+    serializer_class = PaymentSerializer  # класс-сериализатор
+    # permission_classes = [IsAuthenticated]  # права доступа на создание платежей
+
+    def perform_create(self, serializer, **kwargs):
+        """Переопределение метода perform_create для добавления платежу информации о пользователе и уроке"""
+
+        new_payment = serializer.save()  # создаем новый платеж
+        new_payment.user = self.request.user  # добавляем авторизованного пользователя
+        new_payment.lesson = Lesson.objects.get(id=self.kwargs['pk'])  # добавляем урок
+        new_payment.lesson.is_buy = True  # Присваиваем уроку статус "куплено"
+        new_payment.save()  # сохраняем новый платеж
+
+
+class PaymentCourseCreateAPIView(generics.CreateAPIView):
+    """Класс-представление для создания платежа для курса на основе Generics"""
+    serializer_class = PaymentSerializer  # класс-сериализатор
+    # permission_classes = [IsAuthenticated]  # права доступа на создание платежей
+
+    def perform_create(self, serializer, **kwargs):
+        """Переопределение метода perform_create для добавления платежу информации о пользователе и уроке"""
+
+        new_payment = serializer.save()  # создаем новый платеж
+        new_payment.user = self.request.user  # добавляем авторизованного пользователя
+        new_payment.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем урок
+        new_payment.course.is_buy = True  # Присваиваем курсу статус "куплено"
+        new_payment.save()  # сохраняем новый платеж
+
+
 class SubscriptionCreateAPIView(generics.CreateAPIView):
     """Класс-представление для подписки курс на основе Generics"""
 
