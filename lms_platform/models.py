@@ -34,16 +34,26 @@ class Lesson(models.Model):
 class Payment(models.Model):
     """Модель платежа"""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, verbose_name='Пользователь', **NULLABLE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.RESTRICT,
+                             verbose_name='Пользователь',
+                             **NULLABLE)
     payment_date = models.DateTimeField(auto_now=True, verbose_name='Дата оплаты')
     course = models.ForeignKey(Course, verbose_name='Оплаченный курс', on_delete=models.SET_NULL, **NULLABLE)
     lesson = models.ForeignKey(Lesson, verbose_name='Оплаченный урок', on_delete=models.SET_NULL, **NULLABLE)
-    payment_amount = models.DecimalField(max_digits=20, decimal_places=2, verbose_name='Сумма оплаты')
-    payment_method = models.CharField(choices=PAYMENT_METHOD_CHOICES, verbose_name='Способ оплаты')
+    payment_amount = models.DecimalField(max_digits=20,
+                                         decimal_places=2,
+                                         verbose_name='Сумма оплаты',
+                                         **NULLABLE)
+    payment_method = models.CharField(default='money_transfer',
+                                      choices=PAYMENT_METHOD_CHOICES,
+                                      verbose_name='Способ оплаты')
 
 
 class Subscription(models.Model):
     """Модель подписки"""
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.RESTRICT, verbose_name='Пользователь', **NULLABLE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.RESTRICT,
+                             verbose_name='Пользователь', **NULLABLE)
     course = models.ForeignKey(Course, verbose_name='Подписанный курс', on_delete=models.CASCADE, **NULLABLE)

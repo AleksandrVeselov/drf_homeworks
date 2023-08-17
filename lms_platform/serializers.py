@@ -43,10 +43,15 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'  # ПОля
 
 
+
 class PaymentSerializer(serializers.ModelSerializer):
     """Сериализатор модели Платеж"""
 
     payment_link = SerializerMethodField()  # Ссылка на оплату
+
+    class Meta:
+        model = Payment
+        fields = '__all__'
 
     def get_payment_link(self, payment):
         """Метод для получения ссылки на оплату"""
@@ -54,11 +59,8 @@ class PaymentSerializer(serializers.ModelSerializer):
             payment_link = get_stripe_link(payment.course)
         else:
             payment_link = get_stripe_link(payment.lesson)
-        return payment_link
 
-    class Meta:
-        model = Payment
-        fields = '__all__'
+        return payment_link
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

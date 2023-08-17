@@ -111,7 +111,7 @@ class PaymentListAPIView(generics.ListAPIView):
 class PaymentLessonCreateAPIView(generics.CreateAPIView):
     """Класс-представление для создания платежа для урока на основе Generics"""
     serializer_class = PaymentSerializer  # класс-сериализатор
-    # permission_classes = [IsAuthenticated]  # права доступа на создание платежей
+    permission_classes = [IsAuthenticated]  # права доступа на создание платежей
 
     def perform_create(self, serializer, **kwargs):
         """Переопределение метода perform_create для добавления платежу информации о пользователе и уроке"""
@@ -120,6 +120,7 @@ class PaymentLessonCreateAPIView(generics.CreateAPIView):
         new_payment.user = self.request.user  # добавляем авторизованного пользователя
         new_payment.lesson = Lesson.objects.get(id=self.kwargs['pk'])  # добавляем урок
         new_payment.lesson.is_buy = True  # Присваиваем уроку статус "куплено"
+        new_payment.payment_amount = Lesson.objects.get(id=self.kwargs['pk']).price  # добавляем сумму платежа
         new_payment.save()  # сохраняем новый платеж
 
 
@@ -129,12 +130,13 @@ class PaymentCourseCreateAPIView(generics.CreateAPIView):
     # permission_classes = [IsAuthenticated]  # права доступа на создание платежей
 
     def perform_create(self, serializer, **kwargs):
-        """Переопределение метода perform_create для добавления платежу информации о пользователе и уроке"""
+        """Переопределение метода perform_create для добавления платежу информации о пользователе, уроке и сумме"""
 
         new_payment = serializer.save()  # создаем новый платеж
         new_payment.user = self.request.user  # добавляем авторизованного пользователя
         new_payment.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем урок
         new_payment.course.is_buy = True  # Присваиваем курсу статус "куплено"
+        new_payment.payment_amount = Course.objects.get(id=self.kwargs['pk']).price  # добавляем сумму платежа
         new_payment.save()  # сохраняем новый платеж
 
 
@@ -164,8 +166,7 @@ class SubscriptionDestroyAPIView(generics.DestroyAPIView):
         """Переопределение метода perform_destroy для удаления подписки на курс"""
 
         user = self.request.user
-        # получаем подписку
-        subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=user)
+        subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=user)  # получаем подписку
 
         subscription.delete()  # удаляем подписку
 
