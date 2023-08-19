@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 from lms_platform.views import (CourseViewSet, LessonCreateApiView, LessonListApiView, LessonRetrieveApiView, \
                                 LessonUpdateApiView, LessonDestroyApiView, PaymentListAPIView,
                                 PaymentLessonCreateAPIView, PaymentCourseCreateAPIView,
-                                SubscriptionCreateAPIView, SubscriptionDestroyAPIView)
+                                SubscriptionCreateAPIView, SubscriptionDestroyAPIView, confirm_payment)
 
 app_name = LmsPlatformConfig.name
 
@@ -23,5 +23,6 @@ urlpatterns = [
                   path('course/<int:pk>/subscribe/', SubscriptionCreateAPIView.as_view(), name='subscribe'),
                   path('course/<int:pk>/unsubscribe/', SubscriptionDestroyAPIView.as_view(), name='unsubscribe'),
                   path('lesson/payment/<int:pk>/', PaymentLessonCreateAPIView.as_view(), name='payment_create'),
-                  path('course/payment/<int:pk>/', PaymentCourseCreateAPIView.as_view(), name='payment_create')
+                  path('course/payment/<int:pk>/', PaymentCourseCreateAPIView.as_view(), name='payment_create'),
+                  path('confirm_payment/<int:pk>/', confirm_payment, name='payment_success')
               ] + router.urls

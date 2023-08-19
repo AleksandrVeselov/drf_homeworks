@@ -1,14 +1,12 @@
+from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAuthenticated
-
 from lms_platform.models import Course, Lesson, Payment, Subscription
 from lms_platform.paginators import CoursePaginator, LessonPaginator
 from lms_platform.permissions import IsOwnerOrModerator, IsOwner, IsNotModerator
 from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
-from users.models import User
-from users.serializiers import UserSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -119,7 +117,7 @@ class PaymentLessonCreateAPIView(generics.CreateAPIView):
         new_payment = serializer.save()  # создаем новый платеж
         new_payment.user = self.request.user  # добавляем авторизованного пользователя
         new_payment.lesson = Lesson.objects.get(id=self.kwargs['pk'])  # добавляем урок
-        new_payment.lesson.is_buy = True  # Присваиваем уроку статус "куплено"
+        new_payment.save()  # сохраняем новый платеж
         new_payment.payment_amount = Lesson.objects.get(id=self.kwargs['pk']).price  # добавляем сумму платежа
         new_payment.save()  # сохраняем новый платеж
 
@@ -135,7 +133,6 @@ class PaymentCourseCreateAPIView(generics.CreateAPIView):
         new_payment = serializer.save()  # создаем новый платеж
         new_payment.user = self.request.user  # добавляем авторизованного пользователя
         new_payment.course = Course.objects.get(id=self.kwargs['pk'])  # добавляем урок
-        new_payment.course.is_buy = True  # Присваиваем курсу статус "куплено"
         new_payment.payment_amount = Course.objects.get(id=self.kwargs['pk']).price  # добавляем сумму платежа
         new_payment.save()  # сохраняем новый платеж
 
@@ -169,6 +166,26 @@ class SubscriptionDestroyAPIView(generics.DestroyAPIView):
         subscription = Subscription.objects.get(course_id=self.kwargs['pk'], user=user)  # получаем подписку
 
         subscription.delete()  # удаляем подписку
+
+
+def confirm_payment(request, pk):
+    """
+    pk: айдишник платежа
+    Подтверждение платежа на курс или урок
+    """
+    payment = Payment.objects.get(id=pk)  # получаем платеж из базы данных
+    payment.is_confirm = True  # подтверждаем что он прошел
+    payment.save()  # сохраняем платеж в базе данных
+
+    if payment.course:
+        payment.course.is_buy = True  # подтверждаем что курс оплачен
+        payment.course.save()  # сохраняем курс в базе данных
+    else:
+        payment.lesson.is_buy = True  # подтверждаем что урок оплачен
+        payment.lesson.save()  # сохраняем урок в базе данных
+
+    # перенаправляем на страницу с успешным завершением платежа
+    return render(request, 'lms_platform/confirm_payment.html', {'payment': payment})
 
 
 

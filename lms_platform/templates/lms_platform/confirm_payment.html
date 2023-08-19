@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Успех!!</title>
+    <h1>Поздравляем, Ваш платеж прошел успешно!</h1>
+    {% if payment.course %}
+        <h3>Вы приобрели курс {{ payment.course.title }}</h3>
+    {% else %}
+        <h3>Вы приобрели урок {{ payment.lesson.title }}</h3>
+    {% endif %}
+
+    <h3>Стоимость {{ payment.payment_amount }} {{ payment.payment_currency }}</h3>
+</head>
+<body>
+
+</body>
+</html>

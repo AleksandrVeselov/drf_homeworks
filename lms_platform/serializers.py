@@ -43,7 +43,6 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'  # ПОля
 
 
-
 class PaymentSerializer(serializers.ModelSerializer):
     """Сериализатор модели Платеж"""
 
@@ -55,10 +54,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def get_payment_link(self, payment):
         """Метод для получения ссылки на оплату"""
-        if payment.course:
-            payment_link = get_stripe_link(payment.course)
-        else:
-            payment_link = get_stripe_link(payment.lesson)
+        payment_link = get_stripe_link(payment)
 
         return payment_link
 
