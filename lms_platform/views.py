@@ -7,6 +7,7 @@ from lms_platform.models import Course, Lesson, Payment, Subscription
 from lms_platform.paginators import CoursePaginator, LessonPaginator
 from lms_platform.permissions import IsOwnerOrModerator, IsOwner, IsNotModerator
 from lms_platform.serializers import CourseSerializer, LessonSerializer, PaymentSerializer, SubscriptionSerializer
+from lms_platform.tasks import send_update_email
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -41,7 +42,15 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action == 'destroy':
             permission_classes = [IsAuthenticated, IsOwner]
 
+        else:
+            permission_classes = [IsAuthenticated]
+
         return [permission() for permission in permission_classes]
+
+    def perform_update(self, serializer):
+        """при обновлении курса вызываем функцию для отправки письма на почту"""
+        updated_course = serializer.save()  # Сохраняем курс
+        send_update_email.delay(updated_course.id)  # Вызываем функцию для отправки письма на почту
 
 
 class LessonCreateApiView(generics.CreateAPIView):
@@ -55,8 +64,13 @@ class LessonCreateApiView(generics.CreateAPIView):
         """Переопределение метода perform_create для добавления пользователя созданному уроку"""
         new_lesson = serializer.save()
 
-        new_lesson.owner = self.request.user
-        new_lesson.save()
+        new_lesson.owner = self.request.user  # Присваиваем атрибуту значение авторизованного пользователя
+        new_lesson.save()  # Сохраняем урок в базе данных
+
+        # Проверка привязки урока к курсу. Если урок есть в курсе, то отправляем письмо на почту что курс обновлен
+        course = Course.objects.get(id=new_lesson.course.pk)
+        if course:
+            send_update_email.delay(course.id)
 
 
 class LessonListApiView(generics.ListAPIView):
