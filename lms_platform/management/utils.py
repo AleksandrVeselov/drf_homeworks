@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+
 import stripe
 from config import settings
-from lms_platform.models import Course
+from users.models import User
 
 
 def get_stripe_link(payment) -> str:
@@ -32,3 +34,15 @@ def get_stripe_link(payment) -> str:
     # print(payment_link)
 
     return payment_link.get("url")
+
+
+def block_user():
+    """Функция для блокировки пользователя если он не был в онлайне более месяца"""
+
+    users = User.objects.all()  # получаем всех пользователей
+
+    for user in users:
+        print(user.last_login)
+        # если пользователь не был в онлайне более месяца, то блокируем его
+        if user.last_login - datetime.datetime.now == timedelta(days=30):
+            user.is_active = False
