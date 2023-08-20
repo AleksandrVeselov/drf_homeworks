@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import stripe
+from celery import shared_task
+
 from config import settings
 from users.models import User
 
@@ -14,7 +16,7 @@ def get_stripe_link(payment) -> str:
     if payment.course:
         purchase = payment.course  # получаем курс
     else:
-        purchase = payment.lesson   # получаем урок
+        purchase = payment.lesson  # получаем урок
 
     product = stripe.Product.create(name=purchase.title, description=purchase.description)  # создаем продукт
     # print(product)
@@ -35,7 +37,6 @@ def get_stripe_link(payment) -> str:
 
     return payment_link.get("url")
 
-
 def block_user():
     """Функция для блокировки пользователя если он не был в онлайне более месяца"""
 
@@ -44,5 +45,6 @@ def block_user():
     for user in users:
         print(user.last_login)
         # если пользователь не был в онлайне более месяца, то блокируем его
-        if user.last_login - datetime.datetime.now == timedelta(days=30):
+        if datetime.now(timezone.utc) - user.last_login >= timedelta(days=30):
             user.is_active = False
+            user.save()
