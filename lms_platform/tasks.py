@@ -29,7 +29,7 @@ def send_update_email(course: int):
     else:
         pass
 
-
+@shared_task
 def block_user():
     """Функция для блокировки пользователя если он не был в онлайне более месяца"""
     logger.info("function started")
