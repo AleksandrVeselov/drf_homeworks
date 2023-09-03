@@ -86,7 +86,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('NAME'),
         'USER': os.getenv('USER'),
-        'PASSWORD': os.getenv('PASSWORD')
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': 'db'
     }
 }
 
